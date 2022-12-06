@@ -8,10 +8,15 @@ import {
 import { Restaurants } from "../pages/client/restaurants";
 import { Header } from "../components/header";
 import { useMe } from "../hooks/useMe";
+import { NotFound } from "../pages/404";
+import { ConfirmEmail } from "../pages/user/confirm-email";
 
 const ClientRoutes = [
-  <Route path="/" exact>
+  <Route key={1} path="/" exact>
     <Restaurants />
+  </Route>,
+  <Route key={2} path="/confirm">
+    <ConfirmEmail />
   </Route>,
 ];
 
@@ -29,7 +34,9 @@ export const LoggedInRouter = () => {
       <Header />
       <Switch>
         {data.me.role === "Client" && ClientRoutes}
-        <Redirect to="/" />
+        <Route>
+          <NotFound />
+        </Route>
       </Switch>
     </Router>
   );

@@ -15,7 +15,7 @@ const ClientRoutes = [
   <Route key={1} path="/" exact>
     <Restaurants />
   </Route>,
-  <Route key={2} path="/confirm">
+  <Route key={2} path="/confirm" exact>
     <ConfirmEmail />
   </Route>,
 ];

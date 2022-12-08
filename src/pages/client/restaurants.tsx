@@ -72,6 +72,20 @@ export const Restaurants = () => {
               </div>
             ))}
           </div>
+          <div className="grid grid-cols-3 gap-x-5 gap-y-10 mt-10">
+            {data?.allRestaurants.results?.map((restaurant) => (
+              <div className="flex flex-col">
+                <div
+                  style={{ backgroundImage: `url(${restaurant.coverImg})` }}
+                  className="bg-cover bg-center mb-3 py-28"
+                ></div>
+                <h3 className="text-xl">{restaurant.name}</h3>
+                <span className="border-t border-gray-400 mt-2 py-2 text-xs opacity-50">
+                  {restaurant.category?.name}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

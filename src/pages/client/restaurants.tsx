@@ -48,7 +48,7 @@ interface IFromProps {
 
 export const Restaurants = () => {
   const [page, setPage] = useState(1);
-  const { data, loading } = useQuery<
+  const { data, loading, refetch } = useQuery<
     RestaurantsPageQuery,
     RestaurantsPageQueryVariables
   >(RESTAURANTS_QUERY, {
@@ -58,6 +58,7 @@ export const Restaurants = () => {
       },
     },
   });
+  refetch();
   const onNextPageClick = () => setPage((current) => current + 1);
   const onPrevPageClick = () => setPage((current) => current - 1);
   const { register, handleSubmit, getValues } = useForm<IFromProps>();

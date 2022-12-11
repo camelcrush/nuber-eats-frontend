@@ -63,9 +63,9 @@
   },
   "jest": {
     "collectCoverageFrom": [
-      "./src/components/**.*.tsx",
-      "./src/pages/**.*.tsx",
-      "./src/routers/**.*.tsx"
+      "./src/components/**/*.tsx",
+      "./src/pages/**/*.tsx",
+      "./src/routers/**/*.tsx"
     ]
   }
 }

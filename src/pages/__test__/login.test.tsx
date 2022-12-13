@@ -12,9 +12,9 @@ describe("<Login />", () => {
   let mockClient: MockApolloClient;
   // Form이 state를 변화시키기 때문에 async await waitFor를 해주어야 함
   beforeEach(async () => {
-    await waitFor(() => {
+    await waitFor(async () => {
       // mockedClient를 통해 세부적인 테스트를 할 수 있음
-      const mockClient = createMockClient();
+      mockClient = createMockClient();
       renderResult = render(
         <HelmetProvider>
           <Router>
@@ -78,16 +78,21 @@ describe("<Login />", () => {
         login: {
           ok: true,
           token: "XXX",
-          error: null,
+          error: "mutation-error",
         },
       },
     });
     // handler를 통해 쿼리를 테스트 실행 후 Mutation Response를 받기, 그러나 에러로 안됨 포기..
     mockClient.setRequestHandler(LOGIN_MUTATION, mockedMutationResponse);
+    jest.spyOn(Storage.prototype, "setItem");
     userEvent.type(email, formData.email);
     userEvent.type(password, formData.password);
     userEvent.click(submitBtn);
-    await waitFor(() => {
+
+    await waitFor(async () => {
+      const errorMessage = getByRole("alert");
+      expect(errorMessage).toHaveTextContent(/mutation-error/i);
+      expect(localStorage.setItem).toHaveBeenCalledWith("nuber-token", "XXX");
       expect(mockedMutationResponse).toHaveBeenCalledTimes(1);
       expect(mockedMutationResponse).toHaveBeenCalledWith({
         loginInput: {

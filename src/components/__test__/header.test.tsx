@@ -68,6 +68,7 @@ describe("<Header />", () => {
       );
       // Apollo Query, Mutation 등은 시간이 걸리기에 5초정도 기다려야 함
       await new Promise((resolve) => setTimeout(resolve, 5));
+      // queryByText : 없으면 null값을 리턴함, getByText는 에러를 일으킴
       expect(queryByText("Please verify your email")).toBeNull();
     });
   });

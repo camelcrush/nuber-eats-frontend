@@ -1,6 +1,6 @@
 import { ApolloProvider } from "@apollo/client";
 import { createMockClient, MockApolloClient } from "mock-apollo-client";
-import { render, RenderResult, waitFor } from "@testing-library/react";
+import { act, render, RenderResult, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { Login, LOGIN_MUTATION } from "../login";
@@ -85,11 +85,13 @@ describe("<Login />", () => {
     // handler를 통해 쿼리를 테스트 실행 후 Mutation Response를 받기, 그러나 에러로 안됨 포기..
     mockClient.setRequestHandler(LOGIN_MUTATION, mockedMutationResponse);
     jest.spyOn(Storage.prototype, "setItem");
-    userEvent.type(email, formData.email);
-    userEvent.type(password, formData.password);
-    userEvent.click(submitBtn);
-
-    await waitFor(async () => {
+    // 해답을 찾음...
+    await act(async () => {
+      await userEvent.type(email, formData.email);
+      await userEvent.type(password, formData.password);
+      await userEvent.click(submitBtn);
+    });
+    await waitFor(() => {
       const errorMessage = getByRole("alert");
       expect(errorMessage).toHaveTextContent(/mutation-error/i);
       expect(localStorage.setItem).toHaveBeenCalledWith("nuber-token", "XXX");

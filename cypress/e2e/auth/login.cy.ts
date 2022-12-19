@@ -19,15 +19,6 @@ describe("Log In", () => {
   });
 
   it("can fill out the form and log in", () => {
-    user.visit("/");
-    user.findByPlaceholderText(/email/i).type("dkxm0927@customer.com");
-    user.findByPlaceholderText(/password/i).type("123");
-    user
-      .findByRole("button")
-      .should("not.have.class", "pointer-events-none")
-      .click();
-    // window : 현재 활성화된 window 객체를 가져온다
-    // its : 이전에 가져온 객체의 프로퍼티를 가져온다
-    user.window().its("localStorage.nuber-token").should("be.a", "string");
+    user.login("dkxm0927@customer.com", "123");
   });
 });

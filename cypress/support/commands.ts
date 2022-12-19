@@ -36,3 +36,36 @@
 //   }
 // }
 import "@testing-library/cypress/add-commands";
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      assertLoggedIn(): Chainable<void>;
+      assertLoggedOut(): Chainable<void>;
+      login(email: string, password: string): Chainable<void>;
+    }
+  }
+}
+
+Cypress.Commands.add("assertLoggedIn", () => {
+  cy.window().its("localStorage.nuber-token").should("be.a", "string");
+});
+
+Cypress.Commands.add("assertLoggedOut", () => {
+  cy.window().its("localStorage.nuber-token").should("be.undefined");
+});
+
+// @ts-ignore
+Cypress.Commands.add("login", (email, password) => {
+  cy.visit("/");
+  cy.assertLoggedOut();
+  cy.title().should("eq", "Login | Nuber Eats");
+  cy.findByPlaceholderText(/email/i).type(email);
+  cy.findByPlaceholderText(/password/i).type(password);
+  cy.findByRole("button")
+    .should("not.have.class", "pointer-events-none")
+    .click();
+  // window : 현재 활성화된 window 객체를 가져온다
+  // its : 이전에 가져온 객체의 프로퍼티를 가져온다
+  cy.assertLoggedIn();
+});

@@ -1,7 +1,7 @@
-describe("First Test", () => {
+describe("Log In", () => {
   const user = cy;
   it("should go to homepage", () => {
-    cy.visit("/").title().should("eq", "Login | Nuber Eats");
+    user.visit("/").title().should("eq", "Login | Nuber Eats");
   });
 
   it("can see email / password validation errors", () => {
@@ -18,7 +18,7 @@ describe("First Test", () => {
     user.findByRole("alert").should("have.text", "Password is required");
   });
 
-  it("can fill out the form", () => {
+  it("can fill out the form and log in", () => {
     user.visit("/");
     user.findByPlaceholderText(/email/i).type("dkxm0927@customer.com");
     user.findByPlaceholderText(/password/i).type("123");

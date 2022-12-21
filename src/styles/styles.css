@@ -612,6 +612,21 @@ video {
   outline-offset: 2px;
 }
 
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1536px;
+}
+
+.link {
+  --tw-text-opacity: 1;
+  color: rgb(101 163 13 / var(--tw-text-opacity));
+}
+
+.link:hover {
+  text-decoration-line: underline;
+}
+
 .pointer-events-none {
   pointer-events: none;
 }
@@ -667,6 +682,10 @@ video {
 
 .mb-1 {
   margin-bottom: 0.25rem;
+}
+
+.mt-32 {
+  margin-top: 8rem;
 }
 
 .flex {

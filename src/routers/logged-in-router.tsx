@@ -10,6 +10,7 @@ import { Search } from "../pages/client/search";
 import { Category } from "../pages/client/category";
 import { Restaurant } from "../pages/client/restaurant";
 import { MyRestaurants } from "../pages/owner/my-restaurants";
+import { AddRestaurant } from "../pages/owner/add-restaurnat";
 
 const clientRoutes = [
   {
@@ -30,7 +31,10 @@ const clientRoutes = [
   },
 ];
 
-const restaurantRoutes = [{ path: "/", component: <MyRestaurants /> }];
+const restaurantRoutes = [
+  { path: "/", component: <MyRestaurants /> },
+  { path: "/add-restaurant", component: <AddRestaurant /> },
+];
 // clientRoutes, restaurantRoutes도 아래와 같이 마찬가지로 array.map으로 코딩하려 했으나
 // 버전호환성 문제인제 라우터가 정상적으로 작동하지 않음 => exact 추가로 해결
 const commonRoutes = [

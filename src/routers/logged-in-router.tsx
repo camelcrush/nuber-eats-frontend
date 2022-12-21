@@ -12,28 +12,27 @@ import { Restaurant } from "../pages/client/restaurant";
 import { MyRestaurants } from "../pages/owner/my-restaurants";
 
 const clientRoutes = [
-  <Route key={1} path="/" exact>
-    <Restaurants />
-  </Route>,
-  <Route key={2} path="/search">
-    <Search />
-  </Route>,
-  <Route key={3} path="/category/:slug">
-    <Category />
-  </Route>,
-  <Route key={4} path="/restaurant/:id">
-    <Restaurant />
-  </Route>,
+  {
+    path: "/",
+    component: <Restaurants />,
+  },
+  {
+    path: "/search",
+    component: <Search />,
+  },
+  {
+    path: "/category/:slug",
+    component: <Category />,
+  },
+  {
+    path: "/restaurants/:id",
+    component: <Restaurant />,
+  },
 ];
 
-const restaurantRoutes = [
-  <Route key={1} path="/">
-    <MyRestaurants />
-  </Route>,
-];
-
+const restaurantRoutes = [{ path: "/", component: <MyRestaurants /> }];
 // clientRoutes, restaurantRoutes도 아래와 같이 마찬가지로 array.map으로 코딩하려 했으나
-// 버전호환성 문제인제 라우터가 정상적으로 작동하지 않음
+// 버전호환성 문제인제 라우터가 정상적으로 작동하지 않음 => exact 추가로 해결
 const commonRoutes = [
   {
     path: "/confirm",
@@ -58,8 +57,18 @@ export const LoggedInRouter = () => {
     <Router>
       <Header />
       <Switch>
-        {data.me.role === "Client" && clientRoutes}
-        {data.me.role === "Owner" && restaurantRoutes}
+        {data.me.role === "Client" &&
+          clientRoutes.map((route) => (
+            <Route exact key={route.path} path={route.path}>
+              {route.component}
+            </Route>
+          ))}
+        {data.me.role === "Owner" &&
+          restaurantRoutes.map((route) => (
+            <Route exact key={route.path} path={route.path}>
+              {route.component}
+            </Route>
+          ))}
         {commonRoutes.map((route) => (
           <Route key={route.path} path={route.path}>
             {route.component}

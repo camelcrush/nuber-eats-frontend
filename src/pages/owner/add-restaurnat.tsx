@@ -1,19 +1,22 @@
-import { gql, useMutation } from "@apollo/client";
+import { gql, useApolloClient, useMutation } from "@apollo/client";
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import { Button } from "../../components/button";
 import { FormError } from "../../components/form-error";
+import { MY_RESTAURANTS_QUERY } from "./my-restaurants";
 import {
   CreateRestaurantMutation,
   CreateRestaurantMutationVariables,
 } from "../../__generated__/graphql";
+import { useHistory } from "react-router";
 
 const CREATE_RESTAURANT_MUTATION = gql`
   mutation createRestaurant($input: CreateRestaurantInput!) {
     createRestaurant(input: $input) {
       ok
       error
+      restaurantId
     }
   }
 `;
@@ -26,12 +29,43 @@ interface IFormProps {
 }
 
 export const AddRestaurant = () => {
+  const client = useApolloClient();
+  const [imageUrl, setImageUrl] = useState("");
+  const history = useHistory();
   const onCompleted = (data: CreateRestaurantMutation) => {
     const {
-      createRestaurant: { ok, error },
+      createRestaurant: { ok, restaurantId },
     } = data;
     if (ok) {
       setUploading(false);
+      const { name, address, categoryName } = getValues();
+      // query 읽어오기
+      const queryResult = client.readQuery({ query: MY_RESTAURANTS_QUERY });
+      // fake cache 생성: writeQuery는 writeFrgment와 달리 쿼리 양식데이터를 맞춰줘야 함
+      client.writeQuery({
+        query: MY_RESTAURANTS_QUERY,
+        data: {
+          myRestaurants: {
+            ...queryResult.myRestaurants,
+            restaurants: [
+              {
+                address,
+                category: {
+                  name: categoryName,
+                  __typename: "Category",
+                },
+                coverImg: imageUrl,
+                id: restaurantId,
+                isPromoted: false,
+                name,
+                __typename: "Restaurant",
+              },
+              ...queryResult.myRestaurants.restaurants,
+            ],
+          },
+        },
+      });
+      history.push("/");
     }
   };
   const [createRestaurantMutation, { data }] = useMutation<
@@ -40,7 +74,7 @@ export const AddRestaurant = () => {
   >(CREATE_RESTAURANT_MUTATION, { onCompleted });
   const {
     register,
-    formState: { isValid, errors },
+    formState: { isValid },
     getValues,
     handleSubmit,
   } = useForm<IFormProps>({ mode: "onChange" });
@@ -60,6 +94,7 @@ export const AddRestaurant = () => {
           body: formBody,
         })
       ).json();
+      setImageUrl(coverImg);
       // S3 업로드 후 Mutation 실행
       createRestaurantMutation({
         variables: {

@@ -676,16 +676,16 @@ video {
   margin-top: 4rem;
 }
 
+.mt-32 {
+  margin-top: 8rem;
+}
+
 .mt-52 {
   margin-top: 13rem;
 }
 
 .mb-1 {
   margin-bottom: 0.25rem;
-}
-
-.mt-32 {
-  margin-top: 8rem;
 }
 
 .flex {

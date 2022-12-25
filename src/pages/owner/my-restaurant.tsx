@@ -3,7 +3,7 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
-import { DISH_FRAGMENT } from "../../fragments";
+import { Dish } from "../../components/dish";
 import {
   MyRestaurantQueryVariables,
   MyRestaurantQuery,
@@ -24,12 +24,23 @@ export const MY_RESTAURANT_QUERY = gql`
         address
         isPromoted
         menu {
-          ...DishParts
+          id
+          name
+          price
+          photo
+          description
+          options {
+            name
+            extra
+            choices {
+              name
+              extra
+            }
+          }
         }
       }
     }
   }
-  ${DISH_FRAGMENT}
 `;
 
 interface IParams {
@@ -77,7 +88,18 @@ export const MyRestaurant = () => {
         <div className="mt-10">
           {data?.myRestaurant.restaurant?.menu.length === 0 ? (
             <h4 className="text-xl mb-5">Please upload a dish!</h4>
-          ) : null}
+          ) : (
+            <div className="grid mt-16 md:grid-cols-3 gap-x-5 gap-y-10">
+              {data?.myRestaurant.restaurant?.menu.map((dish) => (
+                <Dish
+                  key={dish.name}
+                  name={dish.name}
+                  price={dish.price}
+                  description={dish.description}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

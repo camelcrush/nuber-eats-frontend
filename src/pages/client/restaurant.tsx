@@ -1,11 +1,13 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import { Dish } from "../../components/dish";
 import { DishOption } from "../../components/dish-option";
 import {
   CreateOrderItemInput,
+  CreateOrderMutation,
+  CreateOrderMutationVariables,
   RestaurantQuery,
   RestaurantQueryVariables,
 } from "../../__generated__/graphql";
@@ -154,6 +156,45 @@ export const Restaurant = () => {
     }
     return false;
   };
+  const history = useHistory();
+  const onCompleted = (data: CreateOrderMutation) => {
+    const {
+      createOrder: { ok, orderId },
+    } = data;
+    if (ok) {
+      history.push(`orders/${orderId}`);
+    }
+  };
+  const [createOrderMutation, { loading: placingOrder }] = useMutation<
+    CreateOrderMutation,
+    CreateOrderMutationVariables
+  >(CREATE_ORDER_MUTATION, {
+    onCompleted,
+  });
+  // 주문 취소하기
+  const triggerCancelOrder = () => {
+    setOrderStarted(false);
+    setOrderItems([]);
+  };
+  // 주문 진행하기
+  const triggerConfirmOrder = () => {
+    if (orderItems.length === 0) {
+      alert("Can't place epmty order");
+      return;
+    }
+    // ok 컨펌 시  mutation 진행
+    const ok = window.confirm("You are about to place an order");
+    if (ok) {
+      createOrderMutation({
+        variables: {
+          input: {
+            restaurantId: +params.id,
+            items: orderItems,
+          },
+        },
+      });
+    }
+  };
   return (
     <div>
       <Helmet>
@@ -183,8 +224,13 @@ export const Restaurant = () => {
         )}
         {orderStarted && (
           <div className="flex items-center">
-            <button className="btn px-10 mr-3">Confirm Order</button>
-            <button className="btn px-10 bg-black hover:bg-black">
+            <button onClick={triggerConfirmOrder} className="btn px-10 mr-3">
+              Confirm Order
+            </button>
+            <button
+              onClick={triggerCancelOrder}
+              className="btn px-10 bg-black hover:bg-black"
+            >
               Cancle Order
             </button>
           </div>

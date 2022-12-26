@@ -119,7 +119,7 @@ export const AddDish = () => {
         <div className="my-10">
           <h4 className="font-medium mb-3 text-lg">Dish Options</h4>
           <span
-            onClick={onAddOptionClick}
+            onClick={() => onAddOptionClick()}
             className="cursor-pointer text-white bg-gray-900 py-1 px-2 mt-5"
           >
             Add Dish Option

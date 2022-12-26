@@ -1,4 +1,4 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router";
@@ -13,9 +13,12 @@ import {
   VictoryVoronoiContainer,
 } from "victory";
 import { Dish } from "../../components/dish";
+import { useMe } from "../../hooks/useMe";
 import {
   MyRestaurantQueryVariables,
   MyRestaurantQuery,
+  CreatePaymentMutation,
+  CreatePaymentMutationVariables,
 } from "../../__generated__/graphql";
 
 export const MY_RESTAURANT_QUERY = gql`
@@ -57,6 +60,15 @@ export const MY_RESTAURANT_QUERY = gql`
   }
 `;
 
+const CREATE_PAYMENT_MUTATION = gql`
+  mutation createPayment($input: CreatePaymentInput!) {
+    createPayment(input: $input) {
+      ok
+      error
+    }
+  }
+`;
+
 interface IParams {
   id: string;
 }
@@ -73,12 +85,46 @@ export const MyRestaurant = () => {
       },
     }
   );
+  const onCompleted = (data: CreatePaymentMutation) => {
+    if (data.createPayment.ok) {
+      alert("Your restaurant is being promoted!");
+    }
+  };
+  const [createPaymentMutation] = useMutation<
+    CreatePaymentMutation,
+    CreatePaymentMutationVariables
+  >(CREATE_PAYMENT_MUTATION, {
+    onCompleted,
+  });
+  const { data: userData } = useMe();
+  const triggerPaddle = () => {
+    if (userData?.me.email) {
+      // @ts-ignore
+      // window.Paddle.Setup({ vendor: 31465 });
+      // @ts-ignore
+      // window.Paddle.Checkout.open({
+      //   product: 638793,
+      //   email: userData.me.email,
+      //   successCalback: (data: any) => {
+      //     createPaymentMutation({
+      //       variables: {
+      //         input: {
+      //           transactionId: data.checkout.id,
+      //           restaurantId: +id,
+      //         },
+      //       },
+      //     });
+      //   },
+      // });
+    }
+  };
   return (
     <div>
       <Helmet>
         <title>
           {data?.myRestaurant.restaurant?.name || "Loading..."} | Nuber Eats
         </title>
+        <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
       </Helmet>
       <div
         className="bg-gray-700 py-28 bg-center bg-cover"
@@ -96,17 +142,20 @@ export const MyRestaurant = () => {
         >
           Add Dish &rarr;
         </Link>
-        <Link to={""} className="mr-8 text-white bg-lime-700 py-3 px-10">
+        <span
+          onClick={() => triggerPaddle()}
+          className="cursor-pointer mr-8 text-white bg-lime-700 py-3 px-10"
+        >
           Buy Promotion &rarr;
-        </Link>
+        </span>
         <div className="mt-10">
           {data?.myRestaurant.restaurant?.menu.length === 0 ? (
             <h4 className="text-xl mb-5">Please upload a dish!</h4>
           ) : (
             <div className="grid mt-16 md:grid-cols-3 gap-x-5 gap-y-10">
-              {data?.myRestaurant.restaurant?.menu.map((dish) => (
+              {data?.myRestaurant.restaurant?.menu.map((dish, index) => (
                 <Dish
-                  key={dish.name}
+                  key={index}
                   name={dish.name}
                   price={dish.price}
                   description={dish.description}

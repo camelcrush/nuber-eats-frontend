@@ -1,9 +1,10 @@
 import { gql, useQuery } from "@apollo/client";
-import React from "react";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router";
 import { Dish } from "../../components/dish";
 import {
+  CreateOrderItemInput,
   RestaurantQuery,
   RestaurantQueryVariables,
 } from "../../__generated__/graphql";
@@ -42,6 +43,15 @@ const RESTAURANT_QUERY = gql`
   }
 `;
 
+const CREATE_ORDER_MUTATION = gql`
+  mutation createOrder($input: CreateOrderInput!) {
+    createOrder(input: $input) {
+      ok
+      error
+    }
+  }
+`;
+
 interface IRestaurantParams {
   id: string;
 }
@@ -58,7 +68,29 @@ export const Restaurant = () => {
       },
     }
   );
-  console.log(data);
+  const [orderStarted, setOrderStarted] = useState(false);
+  const [orderItems, setOrderItems] = useState<CreateOrderItemInput[]>([]);
+  // 주문모드 On
+  const triggerStartOrder = () => {
+    setOrderStarted(true);
+  };
+  // 선택여부
+  const isSelected = (dishId: number) => {
+    return Boolean(orderItems.find((dish) => dish.dishId === dishId));
+  };
+  // 아이템 추가하기
+  const addItemToOrder = (dishId: number) => {
+    if (isSelected(dishId)) {
+      return;
+    }
+    setOrderItems((current) => [{ dishId }, ...current]);
+  };
+  // 아이템 제거하기
+  const removeFromOrder = (dishId: number) => {
+    setOrderItems((current) =>
+      current.filter((dish) => dish.dishId !== dishId)
+    );
+  };
   return (
     <div>
       <Helmet>
@@ -80,17 +112,27 @@ export const Restaurant = () => {
           </h6>
         </div>
       </div>
-      <div className="container grid mt-16 mb-16 md:grid-cols-3 gap-x-5 gap-y-10">
-        {data?.restaurant.restaurant?.menu.map((dish, index) => (
-          <Dish
-            key={index}
-            name={dish.name}
-            description={dish.description}
-            price={dish.price}
-            isCustomer={true}
-            options={dish.options}
-          />
-        ))}
+      <div className="container pb-32 flex flex-col items-end mt-20">
+        <button onClick={triggerStartOrder} className="btn px-10">
+          {orderStarted ? "Ordering" : "Start Order"}
+        </button>
+        <div className="w-full grid mt-16 md:grid-cols-3 gap-x-5 gap-y-10">
+          {data?.restaurant.restaurant?.menu.map((dish, index) => (
+            <Dish
+              id={dish.id}
+              key={index}
+              name={dish.name}
+              description={dish.description}
+              price={dish.price}
+              isCustomer={true}
+              options={dish.options}
+              orderStarted={orderStarted}
+              addItemToOrder={addItemToOrder}
+              removeFromOrder={removeFromOrder}
+              isSelected={isSelected(dish.id)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -12,8 +12,8 @@ interface IDishProps {
   orderStarted?: boolean;
   addItemToOrder?: (dishId: number) => void;
   removeFromOrder?: (dishId: number) => void;
-  addOptionToItem?: (dishId: number, option: any) => void;
   isSelected?: boolean;
+  children?: React.ReactNode;
 }
 // options 타입은 codegen을 통해 받은 타입으로 기입
 
@@ -27,8 +27,8 @@ export const Dish: React.FC<IDishProps> = ({
   orderStarted,
   addItemToOrder,
   removeFromOrder,
-  addOptionToItem,
   isSelected,
+  children: dishOptions,
 }) => {
   const onClick = () => {
     if (orderStarted && id) {
@@ -59,20 +59,7 @@ export const Dish: React.FC<IDishProps> = ({
       {isCustomer && options && options?.length !== 0 && (
         <div>
           <h5 className="mt-8 mb-3 font-medium">Dish Options:</h5>
-          {options.map((option, index) => (
-            <span
-              onClick={() =>
-                addOptionToItem && id
-                  ? addOptionToItem(id, { name: option.name })
-                  : null
-              }
-              className="flex items-center"
-              key={index}
-            >
-              <h6 className="mr-2">{option.name}</h6>
-              <h6 className="text-sm opacity-75">(${option.extra})</h6>
-            </span>
-          ))}
+          {dishOptions}
         </div>
       )}
     </div>

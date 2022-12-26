@@ -103,11 +103,31 @@ export const Restaurant = () => {
     // 기존 Item을 없애고 옵션을 추가한 아이템 추가
     // oldItem.options에 typescript 경고가 떴는데 !로 예외처리함
     if (oldItem) {
-      removeFromOrder(dishId);
-      setOrderItems((current) => [
-        { dishId, options: [option, ...oldItem.options!] },
-        ...current,
-      ]);
+      // 옵션 중복 추가를 방지하기 위해 Item에 해당 옵션이 있는지 체크
+      const hasOption = Boolean(
+        oldItem.options?.find((oldOption) => oldOption.name === option.name)
+      );
+      if (!hasOption) {
+        removeFromOrder(dishId);
+        setOrderItems((current) => [
+          { dishId, options: [option, ...oldItem.options!] },
+          ...current,
+        ]);
+      }
+    }
+  };
+  // Item으로부터 해당 옵션 추출하기
+  const getOptionFromItem = (
+    item: CreateOrderItemInput,
+    optionName: string
+  ) => {
+    return item.options?.find((option) => option.name === optionName);
+  };
+  // 추출된 옵션이 Item에 포함되었는지 여부를 리턴
+  const isOptionSelected = (dishId: number, optionName: string) => {
+    const item = getItem(dishId);
+    if (item) {
+      return Boolean(getOptionFromItem(item, optionName));
     }
   };
   console.log(orderItems);
@@ -150,8 +170,26 @@ export const Restaurant = () => {
               addItemToOrder={addItemToOrder}
               removeFromOrder={removeFromOrder}
               isSelected={isSelected(dish.id)}
-              addOptionToItem={addOptionToItem}
-            />
+            >
+              {dish.options?.map((option, index) => (
+                <span
+                  onClick={() =>
+                    addOptionToItem
+                      ? addOptionToItem(dish.id, { name: option.name })
+                      : null
+                  }
+                  className={`flex border items-center ${
+                    isOptionSelected(dish.id, option.name)
+                      ? "border-gray-800"
+                      : ""
+                  }`}
+                  key={index}
+                >
+                  <h6 className="mr-2">{option.name}</h6>
+                  <h6 className="text-sm opacity-75">(${option.extra})</h6>
+                </span>
+              ))}
+            </Dish>
           ))}
         </div>
       </div>

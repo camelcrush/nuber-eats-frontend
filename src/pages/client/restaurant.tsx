@@ -2,7 +2,7 @@ import { gql, useQuery } from "@apollo/client";
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router";
-import { RESTAURANT_FRAGMENT } from "../../fragments";
+import { Dish } from "../../components/dish";
 import {
   RestaurantQuery,
   RestaurantQueryVariables,
@@ -22,6 +22,21 @@ const RESTAURANT_QUERY = gql`
         }
         address
         isPromoted
+        menu {
+          id
+          name
+          price
+          photo
+          description
+          options {
+            name
+            extra
+            choices {
+              name
+              extra
+            }
+          }
+        }
       }
     }
   }
@@ -30,10 +45,9 @@ const RESTAURANT_QUERY = gql`
 interface IRestaurantParams {
   id: string;
 }
-
 export const Restaurant = () => {
   const params = useParams<IRestaurantParams>();
-  const { loading, data } = useQuery<RestaurantQuery, RestaurantQueryVariables>(
+  const { data } = useQuery<RestaurantQuery, RestaurantQueryVariables>(
     RESTAURANT_QUERY,
     {
       variables: {
@@ -44,6 +58,7 @@ export const Restaurant = () => {
       },
     }
   );
+  console.log(data);
   return (
     <div>
       <Helmet>
@@ -64,6 +79,18 @@ export const Restaurant = () => {
             {data?.restaurant.restaurant?.address}
           </h6>
         </div>
+      </div>
+      <div className="container grid mt-16 mb-16 md:grid-cols-3 gap-x-5 gap-y-10">
+        {data?.restaurant.restaurant?.menu.map((dish, index) => (
+          <Dish
+            key={index}
+            name={dish.name}
+            description={dish.description}
+            price={dish.price}
+            isCustomer={true}
+            options={dish.options}
+          />
+        ))}
       </div>
     </div>
   );

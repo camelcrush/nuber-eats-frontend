@@ -35,7 +35,7 @@
     "test": "react-scripts test --verbose",
     "test:coverage": "npm test -- --coverage --watchAll=false",
     "eject": "react-scripts eject",
-    "codegen": "graphql-codegen --config codegen.ts"
+    "codegen": "graphql-codegen"
   },
   "eslintConfig": {
     "extends": [
@@ -58,6 +58,9 @@
   "devDependencies": {
     "@graphql-codegen/cli": "2.14.1",
     "@graphql-codegen/client-preset": "1.1.5",
+    "@graphql-codegen/fragment-matcher": "^3.3.3",
+    "@graphql-codegen/typescript": "^2.8.5",
+    "@graphql-codegen/typescript-operations": "^2.5.10",
     "@testing-library/cypress": "^9.0.0",
     "@types/react-helmet": "^6.1.6",
     "autoprefixer": "^10.4.13",

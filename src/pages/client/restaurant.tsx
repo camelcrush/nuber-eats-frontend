@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router";
 import { Dish } from "../../components/dish";
+import { DishOption } from "../../components/dish-option";
 import {
   CreateOrderItemInput,
   RestaurantQuery,
@@ -95,8 +96,9 @@ export const Restaurant = () => {
       current.filter((dish) => dish.dishId !== dishId)
     );
   };
-  const addOptionToItem = (dishId: number, option: any) => {
-    if (!isSelected) {
+  // item에 옵션 추가하기
+  const addOptionToItem = (dishId: number, optionName: string) => {
+    if (!isSelected(dishId)) {
       return;
     }
     const oldItem = getItem(dishId);
@@ -105,16 +107,36 @@ export const Restaurant = () => {
     if (oldItem) {
       // 옵션 중복 추가를 방지하기 위해 Item에 해당 옵션이 있는지 체크
       const hasOption = Boolean(
-        oldItem.options?.find((oldOption) => oldOption.name === option.name)
+        oldItem.options?.find((oldOption) => oldOption.name === optionName)
       );
       if (!hasOption) {
         removeFromOrder(dishId);
         setOrderItems((current) => [
-          { dishId, options: [option, ...oldItem.options!] },
+          { dishId, options: [{ name: optionName }, ...oldItem.options!] },
           ...current,
         ]);
       }
     }
+  };
+  // item에 옵션 제거하기
+  const removeOptionFromItem = (dishId: number, optionName: string) => {
+    if (!isSelected(dishId)) {
+      return;
+    }
+    const oldItem = getItem(dishId);
+    if (oldItem) {
+      removeFromOrder(dishId);
+      setOrderItems((current) => [
+        {
+          dishId,
+          options: oldItem.options?.filter(
+            (option) => option.name !== optionName
+          ),
+        },
+        ...current,
+      ]);
+    }
+    return;
   };
   // Item으로부터 해당 옵션 추출하기
   const getOptionFromItem = (
@@ -129,8 +151,8 @@ export const Restaurant = () => {
     if (item) {
       return Boolean(getOptionFromItem(item, optionName));
     }
+    return false;
   };
-  console.log(orderItems);
   return (
     <div>
       <Helmet>
@@ -172,22 +194,15 @@ export const Restaurant = () => {
               isSelected={isSelected(dish.id)}
             >
               {dish.options?.map((option, index) => (
-                <span
-                  onClick={() =>
-                    addOptionToItem
-                      ? addOptionToItem(dish.id, { name: option.name })
-                      : null
-                  }
-                  className={`flex border items-center ${
-                    isOptionSelected(dish.id, option.name)
-                      ? "border-gray-800"
-                      : ""
-                  }`}
+                <DishOption
                   key={index}
-                >
-                  <h6 className="mr-2">{option.name}</h6>
-                  <h6 className="text-sm opacity-75">(${option.extra})</h6>
-                </span>
+                  dishId={dish.id}
+                  isSelected={isOptionSelected(dish.id, option.name)}
+                  name={option.name}
+                  extra={option.extra}
+                  addOptionToItem={addOptionToItem}
+                  removeOptionFromItem={removeOptionFromItem}
+                />
               ))}
             </Dish>
           ))}

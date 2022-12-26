@@ -74,16 +74,20 @@ export const Restaurant = () => {
   const triggerStartOrder = () => {
     setOrderStarted(true);
   };
+  // Item 찾기
+  const getItem = (dishId: number) => {
+    return orderItems.find((dish) => dish.dishId === dishId);
+  };
   // 선택여부
   const isSelected = (dishId: number) => {
-    return Boolean(orderItems.find((dish) => dish.dishId === dishId));
+    return Boolean(getItem(dishId));
   };
   // 아이템 추가하기
   const addItemToOrder = (dishId: number) => {
     if (isSelected(dishId)) {
       return;
     }
-    setOrderItems((current) => [{ dishId }, ...current]);
+    setOrderItems((current) => [{ dishId, options: [] }, ...current]);
   };
   // 아이템 제거하기
   const removeFromOrder = (dishId: number) => {
@@ -91,6 +95,22 @@ export const Restaurant = () => {
       current.filter((dish) => dish.dishId !== dishId)
     );
   };
+  const addOptionToItem = (dishId: number, option: any) => {
+    if (!isSelected) {
+      return;
+    }
+    const oldItem = getItem(dishId);
+    // 기존 Item을 없애고 옵션을 추가한 아이템 추가
+    // oldItem.options에 typescript 경고가 떴는데 !로 예외처리함
+    if (oldItem) {
+      removeFromOrder(dishId);
+      setOrderItems((current) => [
+        { dishId, options: [option, ...oldItem.options!] },
+        ...current,
+      ]);
+    }
+  };
+  console.log(orderItems);
   return (
     <div>
       <Helmet>
@@ -130,6 +150,7 @@ export const Restaurant = () => {
               addItemToOrder={addItemToOrder}
               removeFromOrder={removeFromOrder}
               isSelected={isSelected(dish.id)}
+              addOptionToItem={addOptionToItem}
             />
           ))}
         </div>

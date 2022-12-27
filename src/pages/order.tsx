@@ -1,5 +1,5 @@
 import { gql, useQuery, useSubscription } from "@apollo/client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router";
 import {
@@ -57,24 +57,48 @@ interface IParams {
 
 export const Order = () => {
   const params = useParams<IParams>();
-  const { data } = useQuery<GetOrderQuery, GetOrderQueryVariables>(GET_ORDER, {
+  const { data, subscribeToMore } = useQuery<
+    GetOrderQuery,
+    GetOrderQueryVariables
+  >(GET_ORDER, {
     variables: {
       input: {
         id: +params.id,
       },
     },
   });
-  const { data: subscriptionData } = useSubscription<
-    OrderUpdatesSubscription,
-    OrderUpdatesSubscriptionVariables
-  >(ORDER_SUBSCRIPTION, {
-    variables: {
-      input: {
-        id: +params.id,
-      },
-    },
-  });
-  console.log(subscriptionData);
+  // SubcribeToMore는 useEffect와 사용
+  useEffect(() => {
+    if (data?.getOrder.ok) {
+      subscribeToMore({
+        document: ORDER_SUBSCRIPTION,
+        variables: {
+          input: {
+            id: +params.id,
+          },
+        },
+        // updateQuery는 prev와 subscriptionData Args를 가짐
+        // subscriptionData에 변화가 있으면 원래 Query Data의 형식에 맞춰서 덮어씌운 Data를 리턴해줘야함
+        updateQuery: (
+          prev,
+          {
+            subscriptionData: { data },
+          }: { subscriptionData: { data: OrderUpdatesSubscription } }
+        ) => {
+          if (!data) return prev;
+          return {
+            getOrder: {
+              ...prev.getOrder,
+              order: {
+                ...data.orderUpdates,
+              },
+            },
+          };
+        },
+      });
+    }
+  }, [data]);
+
   return (
     <div className="mt-32 container flex justify-center">
       <Helmet>

@@ -25,6 +25,7 @@ const documents = {
     "\n  query searchRestaurant($input: SearchRestaurantInput!) {\n    searchRestaurant(input: $input) {\n      ok\n      error\n      totalPages\n      totalResults\n      restaurants {\n        ...RestaurantParts\n      }\n    }\n  }\n  \n": types.SearchRestaurantDocument,
     "\n  mutation createAccount($createAccountInput: CreateAccountInput!) {\n    createAccount(input: $createAccountInput) {\n      ok\n      error\n    }\n  }\n": types.CreateAccountDocument,
     "\n  mutation login($loginInput: LoginInput!) {\n    login(input: $loginInput) {\n      ok\n      error\n      token\n    }\n  }\n": types.LoginDocument,
+    "\n  query getOrder($input: GetOrderInput!) {\n    getOrder(input: $input) {\n      ok\n      error\n      order {\n        id\n        status\n        total\n        driver {\n          email\n        }\n        customer {\n          email\n        }\n        restaurant {\n          name\n        }\n      }\n    }\n  }\n": types.GetOrderDocument,
     "\n  mutation createDish($input: CreateDishInput!) {\n    createDish(input: $input) {\n      ok\n      error\n    }\n  }\n": types.CreateDishDocument,
     "\n  mutation createRestaurant($input: CreateRestaurantInput!) {\n    createRestaurant(input: $input) {\n      ok\n      error\n      restaurantId\n    }\n  }\n": types.CreateRestaurantDocument,
     "\n  query myRestaurant($input: MyRestaurantInput!) {\n    myRestaurant(input: $input) {\n      ok\n      error\n      restaurant {\n        id\n        name\n        coverImg\n        category {\n          name\n        }\n        address\n        isPromoted\n        menu {\n          id\n          name\n          price\n          photo\n          description\n          options {\n            name\n            extra\n            choices {\n              name\n              extra\n            }\n          }\n        }\n        orders {\n          id\n          createdAt\n          total\n        }\n      }\n    }\n  }\n": types.MyRestaurantDocument,
@@ -84,6 +85,10 @@ export function graphql(source: "\n  mutation createAccount($createAccountInput:
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation login($loginInput: LoginInput!) {\n    login(input: $loginInput) {\n      ok\n      error\n      token\n    }\n  }\n"): (typeof documents)["\n  mutation login($loginInput: LoginInput!) {\n    login(input: $loginInput) {\n      ok\n      error\n      token\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query getOrder($input: GetOrderInput!) {\n    getOrder(input: $input) {\n      ok\n      error\n      order {\n        id\n        status\n        total\n        driver {\n          email\n        }\n        customer {\n          email\n        }\n        restaurant {\n          name\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query getOrder($input: GetOrderInput!) {\n    getOrder(input: $input) {\n      ok\n      error\n      order {\n        id\n        status\n        total\n        driver {\n          email\n        }\n        customer {\n          email\n        }\n        restaurant {\n          name\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

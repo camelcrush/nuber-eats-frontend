@@ -178,6 +178,9 @@ export const Restaurant = () => {
   };
   // 주문 진행하기
   const triggerConfirmOrder = () => {
+    if (placingOrder) {
+      return;
+    }
     if (orderItems.length === 0) {
       alert("Can't place epmty order");
       return;

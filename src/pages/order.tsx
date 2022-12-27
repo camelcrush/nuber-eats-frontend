@@ -1,16 +1,19 @@
-import { gql, useQuery, useSubscription } from "@apollo/client";
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router";
 import { useMe } from "../hooks/useMe";
 import {
+  EditOrderMutation,
+  EditOrderMutationVariables,
   GetOrderQuery,
   GetOrderQueryVariables,
+  OrderStatus,
   OrderUpdatesSubscription,
-  OrderUpdatesSubscriptionVariables,
+  UserRole,
 } from "../__generated__/graphql";
 
-const GET_ORDER = gql`
+const GET_ORDER_QUERY = gql`
   query getOrder($input: GetOrderInput!) {
     getOrder(input: $input) {
       ok
@@ -52,6 +55,15 @@ const ORDER_SUBSCRIPTION = gql`
   }
 `;
 
+const EDIT_ORDER_MUTATION = gql`
+  mutation editOrder($input: EditOrderInput!) {
+    editOrder(input: $input) {
+      ok
+      error
+    }
+  }
+`;
+
 interface IParams {
   id: string;
 }
@@ -62,13 +74,17 @@ export const Order = () => {
   const { data, subscribeToMore } = useQuery<
     GetOrderQuery,
     GetOrderQueryVariables
-  >(GET_ORDER, {
+  >(GET_ORDER_QUERY, {
     variables: {
       input: {
         id: +params.id,
       },
     },
   });
+  const [editOrderMutation] =
+    useMutation<EditOrderMutation, EditOrderMutationVariables>(
+      EDIT_ORDER_MUTATION
+    );
   // SubcribeToMore는 useEffect와 사용
   useEffect(() => {
     if (data?.getOrder.ok) {
@@ -100,6 +116,16 @@ export const Order = () => {
       });
     }
   }, [data]);
+  const onButtonClick = (newStatus: OrderStatus) => {
+    editOrderMutation({
+      variables: {
+        input: {
+          id: +params.id,
+          status: newStatus,
+        },
+      },
+    });
+  };
   return (
     <div className="mt-32 container flex justify-center">
       <Helmet>
@@ -131,19 +157,35 @@ export const Order = () => {
               {data?.getOrder.order?.driver?.email || "Not yet."}
             </span>
           </div>
-          {userData?.me.role === "Client" && (
+          {userData?.me.role === UserRole.Client && (
             <span className=" text-center mt-5 mb-3  text-2xl text-lime-600">
               Status: {data?.getOrder.order?.status}
             </span>
           )}
-          {userData?.me.role === "Owner" && (
+          {userData?.me.role === UserRole.Owner && (
             <>
-              {data?.getOrder.order?.status === "Pending" && (
-                <button className="btn">Accept Order</button>
+              {data?.getOrder.order?.status === OrderStatus.Pending && (
+                <button
+                  onClick={() => onButtonClick(OrderStatus.Cooking)}
+                  className="btn"
+                >
+                  Accept Order
+                </button>
               )}
-              {data?.getOrder.order?.status === "Cooking" && (
-                <button className="btn">Order Cooked</button>
+              {data?.getOrder.order?.status === OrderStatus.Cooking && (
+                <button
+                  onClick={() => onButtonClick(OrderStatus.Cooked)}
+                  className="btn"
+                >
+                  Order Cooked
+                </button>
               )}
+              {data?.getOrder.order?.status !== OrderStatus.Pending &&
+                data?.getOrder.order?.status !== OrderStatus.Cooking && (
+                  <span className=" text-center mt-5 mb-3  text-2xl text-lime-600">
+                    Status: {data?.getOrder.order?.status}
+                  </span>
+                )}
             </>
           )}
         </div>

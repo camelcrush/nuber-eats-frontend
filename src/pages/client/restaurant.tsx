@@ -162,7 +162,7 @@ export const Restaurant = () => {
       createOrder: { ok, orderId },
     } = data;
     if (ok) {
-      history.push(`orders/${orderId}`);
+      history.push(`/orders/${orderId}`);
     }
   };
   const [createOrderMutation, { loading: placingOrder }] = useMutation<

@@ -1,7 +1,7 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
-import React from "react";
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import { Link } from "react-router-dom";
 import {
   VictoryAxis,
@@ -19,6 +19,7 @@ import {
   MyRestaurantQuery,
   CreatePaymentMutation,
   CreatePaymentMutationVariables,
+  PendigOrdersSubscription,
 } from "../../__generated__/graphql";
 
 export const MY_RESTAURANT_QUERY = gql`
@@ -65,6 +66,25 @@ const CREATE_PAYMENT_MUTATION = gql`
     createPayment(input: $input) {
       ok
       error
+    }
+  }
+`;
+
+const PENDIG_ORDERS_SUBSCRIPTION = gql`
+  subscription pendigOrders {
+    pendingOrders {
+      id
+      status
+      total
+      driver {
+        email
+      }
+      customer {
+        email
+      }
+      restaurant {
+        name
+      }
     }
   }
 `;
@@ -118,6 +138,15 @@ export const MyRestaurant = () => {
       // });
     }
   };
+  const { data: subscriptionData } = useSubscription<PendigOrdersSubscription>(
+    PENDIG_ORDERS_SUBSCRIPTION
+  );
+  const history = useHistory();
+  useEffect(() => {
+    if (subscriptionData?.pendingOrders.id) {
+      history.push(`/orders/${subscriptionData.pendingOrders.id}`);
+    }
+  }, [subscriptionData]);
   return (
     <div>
       <Helmet>

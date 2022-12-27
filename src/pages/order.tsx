@@ -2,6 +2,7 @@ import { gql, useQuery, useSubscription } from "@apollo/client";
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router";
+import { useMe } from "../hooks/useMe";
 import {
   GetOrderQuery,
   GetOrderQueryVariables,
@@ -57,6 +58,7 @@ interface IParams {
 
 export const Order = () => {
   const params = useParams<IParams>();
+  const { data: userData } = useMe();
   const { data, subscribeToMore } = useQuery<
     GetOrderQuery,
     GetOrderQueryVariables
@@ -98,7 +100,6 @@ export const Order = () => {
       });
     }
   }, [data]);
-
   return (
     <div className="mt-32 container flex justify-center">
       <Helmet>
@@ -130,9 +131,21 @@ export const Order = () => {
               {data?.getOrder.order?.driver?.email || "Not yet."}
             </span>
           </div>
-          <span className=" text-center mt-5 mb-3  text-2xl text-lime-600">
-            Status: {data?.getOrder.order?.status}
-          </span>
+          {userData?.me.role === "Client" && (
+            <span className=" text-center mt-5 mb-3  text-2xl text-lime-600">
+              Status: {data?.getOrder.order?.status}
+            </span>
+          )}
+          {userData?.me.role === "Owner" && (
+            <>
+              {data?.getOrder.order?.status === "Pending" && (
+                <button className="btn">Accept Order</button>
+              )}
+              {data?.getOrder.order?.status === "Cooking" && (
+                <button className="btn">Order Cooked</button>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

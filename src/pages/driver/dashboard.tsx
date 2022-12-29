@@ -1,8 +1,12 @@
-import { gql, useSubscription } from "@apollo/client";
+import { gql, useMutation, useSubscription } from "@apollo/client";
 import GoogleMapReact from "google-map-react";
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { CookedOrdersSubscription } from "../../__generated__/graphql";
+import { Link, useHistory } from "react-router-dom";
+import {
+  CookedOrdersSubscription,
+  TakeOrderMutation,
+  TakeOrderMutationVariables,
+} from "../../__generated__/graphql";
 
 const COOKED_ORDERS_SUBSCRIPTION = gql`
   subscription cookedOrders {
@@ -19,6 +23,15 @@ const COOKED_ORDERS_SUBSCRIPTION = gql`
       restaurant {
         name
       }
+    }
+  }
+`;
+
+const TAKE_ORDER_MUTATION = gql`
+  mutation takeOrder($input: TakeOrderInput!) {
+    takeOrder(input: $input) {
+      ok
+      error
     }
   }
 `;
@@ -110,14 +123,38 @@ export const Dashboard = () => {
       );
     }
   };
-  const { data: coockedOrdersData } = useSubscription<CookedOrdersSubscription>(
+  // cookedOrders Subscription
+  const { data: cookedOrdersData } = useSubscription<CookedOrdersSubscription>(
     COOKED_ORDERS_SUBSCRIPTION
   );
+  console.log(cookedOrdersData);
+  // cookedOrders Subscription에서 데이터가 오면 경로 만들어 주기
   useEffect(() => {
-    if (coockedOrdersData?.cookedOrders.id) {
+    if (cookedOrdersData?.cookedOrders.id) {
       makeRoute();
     }
-  }, [coockedOrdersData]);
+  }, [cookedOrdersData]);
+  // takeOrder Mutation이 완료되면 Order로 페이지 이동
+  const history = useHistory();
+  const onCompleted = (data: TakeOrderMutation) => {
+    if (data.takeOrder.ok) {
+      history.push(`/orders/${cookedOrdersData?.cookedOrders.id}`);
+    }
+  };
+  // TakeOrder Mutation: Driver가 Order 접수
+  const [takeOrderMutation] = useMutation<
+    TakeOrderMutation,
+    TakeOrderMutationVariables
+  >(TAKE_ORDER_MUTATION, { onCompleted });
+  const triggerMutation = (orderId: number) => {
+    takeOrderMutation({
+      variables: {
+        input: {
+          id: orderId,
+        },
+      },
+    });
+  };
   return (
     <div>
       <div
@@ -140,20 +177,20 @@ export const Dashboard = () => {
         </GoogleMapReact>
       </div>
       <div className=" max-w-screen-sm mx-auto bg-white relative -top-10 shadow-lg py-8 px-5">
-        {coockedOrdersData?.cookedOrders.restaurant ? (
+        {cookedOrdersData?.cookedOrders.restaurant ? (
           <>
             <h1 className="text-center text-3xl font-medium">
               New Cooked Order
             </h1>
             <h1 className="text-center my-3 text-2xl font-medium">
-              Pick it up sonn @ {coockedOrdersData.cookedOrders.restaurant.name}
+              Pick it up soon @ {cookedOrdersData.cookedOrders.restaurant.name}
             </h1>
-            <Link
-              to={`/orders/${coockedOrdersData.cookedOrders.id}`}
+            <button
+              onClick={() => triggerMutation(cookedOrdersData.cookedOrders.id)}
               className="btn w-full block text-center mt-5"
             >
               Accept Challenge &rarr;
-            </Link>
+            </button>
           </>
         ) : (
           <h1 className="text-center text-3xl font-medium">No orders yet...</h1>

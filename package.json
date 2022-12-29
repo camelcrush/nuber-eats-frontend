@@ -65,6 +65,7 @@
     "@graphql-codegen/typescript-operations": "^2.5.10",
     "@testing-library/cypress": "^9.0.0",
     "@types/google-map-react": "^2.1.7",
+    "@types/google.maps": "^3.51.0",
     "@types/react-helmet": "^6.1.6",
     "autoprefixer": "^10.4.13",
     "mock-apollo-client": "^1.2.1",

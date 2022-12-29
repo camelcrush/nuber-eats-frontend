@@ -1,5 +1,27 @@
+import { gql, useSubscription } from "@apollo/client";
 import GoogleMapReact from "google-map-react";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { CookedOrdersSubscription } from "../../__generated__/graphql";
+
+const COOKED_ORDERS_SUBSCRIPTION = gql`
+  subscription cookedOrders {
+    cookedOrders {
+      id
+      status
+      total
+      driver {
+        email
+      }
+      customer {
+        email
+      }
+      restaurant {
+        name
+      }
+    }
+  }
+`;
 
 interface ICoords {
   lat: number;
@@ -41,15 +63,15 @@ export const Dashboard = () => {
       // 지오코딩은 주소 (예: '1600 Amphitheatre Parkway, Mountain View, CA')를 지리 좌표(예: 위도 37.423021, 경도 -122.083739)로 변환하는 프로세스입니다.
       // 이 지리적 좌표를 사용하여 마커를 배치하거나 지도의 위치를 지정할 수 있습니다.
       // 역 지오코딩은 지리 좌표를 사람이 읽을 수 있는 주소로 변환하는 과정
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode(
-        {
-          location: new google.maps.LatLng(driverCoords.lat, driverCoords.lng),
-        },
-        (results, status) => {
-          console.log(status, results);
-        }
-      );
+      // const geocoder = new google.maps.Geocoder();
+      // geocoder.geocode(
+      //   {
+      //     location: new google.maps.LatLng(driverCoords.lat, driverCoords.lng),
+      //   },
+      //   (results, status) => {
+      //     console.log(status, results);
+      //   }
+      // );
     }
   }, [driverCoords.lat, driverCoords.lng]);
   // map, maps class 다루기
@@ -59,7 +81,7 @@ export const Dashboard = () => {
     setMap(map);
     setMaps(maps);
   };
-  const onGetRouteClick = () => {
+  const makeRoute = () => {
     // Direction 표시 로직, typescript를 꼭 설치하자! npm i @types/google.maps
     if (map) {
       const directionsService = new google.maps.DirectionsService();
@@ -88,6 +110,14 @@ export const Dashboard = () => {
       );
     }
   };
+  const { data: coockedOrdersData } = useSubscription<CookedOrdersSubscription>(
+    COOKED_ORDERS_SUBSCRIPTION
+  );
+  useEffect(() => {
+    if (coockedOrdersData?.cookedOrders.id) {
+      makeRoute();
+    }
+  }, [coockedOrdersData]);
   return (
     <div>
       <div
@@ -109,7 +139,26 @@ export const Dashboard = () => {
           <Driver lat={driverCoords.lat} lng={driverCoords.lng} />
         </GoogleMapReact>
       </div>
-      <button onClick={onGetRouteClick}>Get route</button>
+      <div className=" max-w-screen-sm mx-auto bg-white relative -top-10 shadow-lg py-8 px-5">
+        {coockedOrdersData?.cookedOrders.restaurant ? (
+          <>
+            <h1 className="text-center text-3xl font-medium">
+              New Cooked Order
+            </h1>
+            <h1 className="text-center my-3 text-2xl font-medium">
+              Pick it up sonn @ {coockedOrdersData.cookedOrders.restaurant.name}
+            </h1>
+            <Link
+              to={`/orders/${coockedOrdersData.cookedOrders.id}`}
+              className="btn w-full block text-center mt-5"
+            >
+              Accept Challenge &rarr;
+            </Link>
+          </>
+        ) : (
+          <h1 className="text-center text-3xl font-medium">No orders yet...</h1>
+        )}
+      </div>
     </div>
   );
 };

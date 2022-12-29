@@ -14,24 +14,14 @@ import { AddRestaurant } from "../pages/owner/add-restaurant";
 import { MyRestaurant } from "../pages/owner/my-restaurant";
 import { AddDish } from "../pages/owner/add-dish";
 import { Order } from "../pages/order";
+import { UserRole } from "../__generated__/graphql";
+import { Dashboard } from "../pages/driver/dashboard";
 
 const clientRoutes = [
-  {
-    path: "/",
-    component: <Restaurants />,
-  },
-  {
-    path: "/search",
-    component: <Search />,
-  },
-  {
-    path: "/category/:slug",
-    component: <Category />,
-  },
-  {
-    path: "/restaurants/:id",
-    component: <Restaurant />,
-  },
+  { path: "/", component: <Restaurants /> },
+  { path: "/search", component: <Search /> },
+  { path: "/category/:slug", component: <Category /> },
+  { path: "/restaurants/:id", component: <Restaurant /> },
 ];
 
 const restaurantRoutes = [
@@ -40,6 +30,8 @@ const restaurantRoutes = [
   { path: "/restaurants/:id", component: <MyRestaurant /> },
   { path: "/restaurants/:restaurantId/add-dish", component: <AddDish /> },
 ];
+
+const driverRoutes = [{ path: "/", component: <Dashboard /> }];
 // clientRoutes, restaurantRoutes도 아래와 같이 마찬가지로 array.map으로 코딩하려 했으나
 // 버전호환성 문제인제 라우터가 정상적으로 작동하지 않음 => exact 추가로 해결
 const commonRoutes = [
@@ -61,14 +53,20 @@ export const LoggedInRouter = () => {
     <Router>
       <Header />
       <Switch>
-        {data.me.role === "Client" &&
+        {data.me.role === UserRole.Client &&
           clientRoutes.map((route) => (
             <Route exact key={route.path} path={route.path}>
               {route.component}
             </Route>
           ))}
-        {data.me.role === "Owner" &&
+        {data.me.role === UserRole.Owner &&
           restaurantRoutes.map((route) => (
+            <Route exact key={route.path} path={route.path}>
+              {route.component}
+            </Route>
+          ))}
+        {data.me.role === UserRole.Delivery &&
+          driverRoutes.map((route) => (
             <Route exact key={route.path} path={route.path}>
               {route.component}
             </Route>

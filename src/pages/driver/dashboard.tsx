@@ -59,6 +59,35 @@ export const Dashboard = () => {
     setMap(map);
     setMaps(maps);
   };
+  const onGetRouteClick = () => {
+    // Direction 표시 로직, typescript를 꼭 설치하자! npm i @types/google.maps
+    if (map) {
+      const directionsService = new google.maps.DirectionsService();
+      const directionsRenderer = new google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
+      directionsService.route(
+        {
+          origin: {
+            location: new google.maps.LatLng(
+              driverCoords.lat,
+              driverCoords.lng
+            ),
+          },
+          destination: {
+            location: new google.maps.LatLng(
+              driverCoords.lat + 0.05,
+              driverCoords.lng - 0.05
+            ),
+          },
+          // 한국에서는 정책상 TRANSITA 모드만 됨... Driving을 구현하려면 카카오맵 등을 사용고려 필요
+          travelMode: google.maps.TravelMode.TRANSIT,
+        },
+        (result) => {
+          directionsRenderer.setDirections(result);
+        }
+      );
+    }
+  };
   return (
     <div>
       <div
@@ -80,6 +109,7 @@ export const Dashboard = () => {
           <Driver lat={driverCoords.lat} lng={driverCoords.lng} />
         </GoogleMapReact>
       </div>
+      <button onClick={onGetRouteClick}>Get route</button>
     </div>
   );
 };

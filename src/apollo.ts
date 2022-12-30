@@ -18,16 +18,24 @@ export const authTokenVar = makeVar(token);
 
 // 웹소켓 링크 추가하기
 const wsLink = new WebSocketLink(
-  new SubscriptionClient("ws://localhost:4000/graphql", {
-    reconnect: true,
-    connectionParams: {
-      "x-jwt": authTokenVar() || "",
-    },
-  })
+  new SubscriptionClient(
+    process.env.NODE_ENV === "production"
+      ? "wss://nuber-eats-backend-camelcrush.herokuapp.com/graphql"
+      : `ws://localhost:4000/graphql`,
+    {
+      reconnect: true,
+      connectionParams: {
+        "x-jwt": authTokenVar() || "",
+      },
+    }
+  )
 );
 // http 링크 추가하기
 const httpLink = createHttpLink({
-  uri: "http://localhost:4000/graphql",
+  uri:
+    process.env.NODE_ENV === "production"
+      ? "https://nuber-eats-backend-camelcrush.herokuapp.com/graphql"
+      : "http://localhost:4000/graphql",
 });
 // auth 링크 추가하기
 const authLink = setContext((_, { headers }) => {
